@@ -1,0 +1,14 @@
+.env
+.env.*
+.pytest_cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.vscode/
+.idea/
+.venv/
+intent_dev.db
+*.sqlite
+*.sqlite3

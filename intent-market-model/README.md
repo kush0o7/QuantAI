@@ -15,6 +15,11 @@ The demo frontend is available at `http://localhost:8000/`.
 
 Note: multi-tenant support adds new tables/columns. If you already have a Postgres volume from before this change, reset it with `docker compose down -v`.
 
+## Public repo checklist
+
+- Do not commit `.env` (use `.env.example`).
+- Keep mock fixtures only; add real outcomes via private data stores.
+
 ## Create a tenant and company
 
 ```bash
