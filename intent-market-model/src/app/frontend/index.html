@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Intent Market Model — Demo</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Intent-Level Market Model</p>
+        <h1>See decisions <span>before</span> they show up in numbers.</h1>
+        <p class="subhead">
+          We read early signals like job posts and filings, then explain what a company
+          is likely preparing to do next.
+        </p>
+      </div>
+      <div class="hero-card">
+        <h2>Quick Demo</h2>
+        <ol>
+          <li>Create a tenant</li>
+          <li>Create or select a company</li>
+          <li>Ingest signals</li>
+          <li>View intent summaries</li>
+        </ol>
+        <button id="run-demo" class="primary">Run demo (Acme AI)</button>
+        <p class="tiny">This uses mock fixtures already in the system.</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="panel-title">
+          <h3>0) Tenant</h3>
+          <span class="pill">Workspace</span>
+        </div>
+        <div class="form-row">
+          <label>
+            Tenant name
+            <input id="tenant-name" placeholder="Demo Workspace" value="Demo Workspace" />
+          </label>
+          <button id="create-tenant">Create tenant</button>
+        </div>
+        <div class="form-row">
+          <label>
+            Tenant ID
+            <input id="tenant-id" placeholder="1" />
+          </label>
+          <button id="load-tenant">Use tenant</button>
+        </div>
+        <div id="tenant-status" class="status"></div>
+      </section>
+      <section class="panel">
+        <div class="panel-title">
+          <h3>1) Company</h3>
+          <span class="pill">Input</span>
+        </div>
+        <div class="form-row">
+          <label>
+            Name
+            <input id="company-name" placeholder="Acme AI" value="Acme AI" />
+          </label>
+          <label>
+            Domain
+            <input id="company-domain" placeholder="acme-ai.com" value="acme-ai.com" />
+          </label>
+          <button id="create-company">Create</button>
+        </div>
+        <div class="form-row">
+          <label>
+            Company ID
+            <input id="company-id" placeholder="1" />
+          </label>
+          <button id="load-company">Load</button>
+        </div>
+        <div id="company-status" class="status"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h3>2) Signals</h3>
+          <span class="pill">Input</span>
+        </div>
+        <div class="form-row">
+          <button data-source="mock" class="secondary ingest">Ingest job posts</button>
+          <button data-source="sec_mock" class="secondary ingest">Ingest filings</button>
+          <button id="run-pipeline" class="secondary">Run full pipeline</button>
+        </div>
+        <div id="ingest-status" class="status"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h3>3) Outcomes + Backtest</h3>
+          <span class="pill">Proof</span>
+        </div>
+        <div class="form-row">
+          <button id="seed-outcomes">Add sample outcomes</button>
+          <button id="run-backtest" class="secondary">Run backtest</button>
+        </div>
+        <div id="backtest-status" class="status"></div>
+        <div class="dashboard" id="backtest-scorecard"></div>
+        <div class="dashboard" id="backtest-report"></div>
+        <div class="chart" id="backtest-chart"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h3>4) Intent Dashboard</h3>
+          <span class="pill">Output</span>
+        </div>
+        <div class="dashboard" id="intent-dashboard"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h3>5) Evidence Feed</h3>
+          <span class="pill">Why it thinks this</span>
+        </div>
+        <div class="feed" id="intent-feed"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h3>6) Intent Timeline</h3>
+          <span class="pill">Change over time</span>
+        </div>
+        <div class="feed" id="intent-timeline"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        This is a prototype. The real product learns over time and becomes a memory of
+        how intent leads to outcomes.
+      </p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

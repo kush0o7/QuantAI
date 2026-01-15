@@ -1,0 +1,90 @@
+[
+  {
+    "id": "acme-001",
+    "title": "Product Manager, Growth",
+    "team": "Product",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Mid",
+    "posted_at": "2024-01-05T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/001",
+    "description": "Drive product expansion and growth experiments. Partner with engineering to scale the core workflow."
+  },
+  {
+    "id": "acme-002",
+    "title": "Software Engineer, Backend",
+    "team": "Product Engineering",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Mid",
+    "posted_at": "2024-02-10T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/002",
+    "description": "Build product features and customer integrations. Work with Postgres and Kafka."
+  },
+  {
+    "id": "acme-003",
+    "title": "ML Platform Engineer",
+    "team": "Infrastructure",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-03-15T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/003",
+    "description": "Own ML infrastructure, feature store, and model deployment platform. Partner with infra teams to scale."
+  },
+  {
+    "id": "acme-004",
+    "title": "Site Reliability Engineer",
+    "team": "Infrastructure",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-04-18T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/004",
+    "description": "Improve platform reliability, Kubernetes operations, and infrastructure automation using Terraform."
+  },
+  {
+    "id": "acme-005",
+    "title": "Security Engineer",
+    "team": "Security",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-05-12T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/005",
+    "description": "Lead security risk assessments, privacy reviews, and compliance readiness for enterprise customers."
+  },
+  {
+    "id": "acme-006",
+    "title": "Compliance Program Manager",
+    "team": "Security",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-06-05T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/006",
+    "description": "Own governance, audit readiness, and compliance programs across the organization."
+  },
+  {
+    "id": "acme-007",
+    "title": "Platform Data Engineer",
+    "team": "Infrastructure",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-07-09T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/007",
+    "description": "Build the internal data platform on AWS, Spark, and Kafka to support ML infrastructure."
+  },
+  {
+    "id": "acme-008",
+    "title": "Technical Program Manager, Governance",
+    "team": "Operations",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-08-14T09:00:00Z",
+    "url": "https://acme-ai.com/jobs/008",
+    "description": "Coordinate cross-functional governance initiatives, compliance audits, and security risk controls."
+  }
+]

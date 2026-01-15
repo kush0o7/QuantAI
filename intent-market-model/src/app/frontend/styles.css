@@ -1,0 +1,265 @@
+:root {
+  --ink: #101218;
+  --ink-soft: #2f3440;
+  --paper: #f7f3ee;
+  --accent: #f25f5c;
+  --accent-dark: #d84845;
+  --sun: #ffd166;
+  --mint: #4ecdc4;
+  --shadow: rgba(16, 18, 24, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Avenir Next", "Futura", "Trebuchet MS", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top, #fff7ea 0%, #f3efe9 45%, #ece7e1 100%);
+  min-height: 100vh;
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2rem;
+  padding: 4rem 6vw 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.eyebrow {
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+h1 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-weight: 500;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  margin: 0.5rem 0 1rem;
+}
+
+h1 span {
+  color: var(--accent);
+}
+
+.subhead {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  max-width: 36rem;
+}
+
+.hero-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 45px var(--shadow);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.hero-card h2 {
+  margin-top: 0;
+}
+
+.hero-card ol {
+  padding-left: 1.2rem;
+  line-height: 1.6;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 6vw 4rem;
+  display: grid;
+  gap: 2rem;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 1.5rem;
+  padding: 1.8rem;
+  box-shadow: 0 18px 30px var(--shadow);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel-title h3 {
+  margin: 0;
+}
+
+.pill {
+  background: var(--mint);
+  color: #082b2a;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  font-size: 1rem;
+}
+
+button {
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.primary {
+  background: var(--accent);
+  color: white;
+}
+
+.secondary {
+  background: var(--sun);
+  color: #433300;
+}
+
+.status {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  min-height: 1.2rem;
+}
+
+.dashboard {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.chart {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.bar {
+  height: 12px;
+  background: #f4e6d3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.card h4 {
+  margin: 0 0 0.5rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.feed {
+  display: grid;
+  gap: 1rem;
+}
+
+.feed-item {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1rem;
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
+}
+
+.feed-item span {
+  font-weight: 600;
+}
+
+.tiny {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+footer {
+  padding: 2rem 6vw 3rem;
+  color: var(--ink-soft);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding: 3rem 7vw 1rem;
+  }
+
+  main {
+    padding: 1rem 7vw 3rem;
+  }
+
+  input {
+    min-width: 100%;
+  }
+}

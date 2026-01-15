@@ -1,0 +1,20 @@
+[
+  {
+    "id": "orbit-sec-001",
+    "filing_type": "10-Q",
+    "title": "Quarterly Report",
+    "section": "Liquidity",
+    "filed_at": "2024-06-25T09:00:00Z",
+    "url": "https://sec.example/orbit/10q",
+    "body": "We continue to optimize costs, including higher contractor utilization and efficiency programs."
+  },
+  {
+    "id": "orbit-sec-002",
+    "filing_type": "8-K",
+    "title": "Strategic Update",
+    "section": "Technology",
+    "filed_at": "2024-08-18T09:00:00Z",
+    "url": "https://sec.example/orbit/8k",
+    "body": "Our platform modernization program will sunset legacy payment rails and expand compliance readiness."
+  }
+]

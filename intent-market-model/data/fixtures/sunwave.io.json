@@ -1,0 +1,90 @@
+[
+  {
+    "id": "sunwave-001",
+    "title": "Product Manager, Mobile",
+    "team": "Product",
+    "location": "Austin, TX",
+    "employment_type": "Full-time",
+    "seniority": "Mid",
+    "posted_at": "2024-02-01T09:00:00Z",
+    "url": "https://sunwave.io/jobs/001",
+    "description": "Define roadmap for mobile product expansion and new user growth."
+  },
+  {
+    "id": "sunwave-002",
+    "title": "Senior iOS Engineer",
+    "team": "Product Engineering",
+    "location": "Austin, TX",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-02-18T09:00:00Z",
+    "url": "https://sunwave.io/jobs/002",
+    "description": "Build consumer-facing features and scale performance for mobile experiences."
+  },
+  {
+    "id": "sunwave-003",
+    "title": "Growth Marketing Lead",
+    "team": "Marketing",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-03-10T09:00:00Z",
+    "url": "https://sunwave.io/jobs/003",
+    "description": "Drive growth campaigns and expansion into new markets."
+  },
+  {
+    "id": "sunwave-004",
+    "title": "Data Analyst",
+    "team": "Product",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Mid",
+    "posted_at": "2024-04-06T09:00:00Z",
+    "url": "https://sunwave.io/jobs/004",
+    "description": "Analyze product usage to support expansion and scale."
+  },
+  {
+    "id": "sunwave-005",
+    "title": "Security Engineer",
+    "team": "Security",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-05-22T09:00:00Z",
+    "url": "https://sunwave.io/jobs/005",
+    "description": "Enhance security and privacy controls across consumer products."
+  },
+  {
+    "id": "sunwave-006",
+    "title": "Platform Engineer",
+    "team": "Infrastructure",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-06-17T09:00:00Z",
+    "url": "https://sunwave.io/jobs/006",
+    "description": "Build shared platform services to scale product delivery."
+  },
+  {
+    "id": "sunwave-007",
+    "title": "Product Designer",
+    "team": "Product",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Mid",
+    "posted_at": "2024-07-08T09:00:00Z",
+    "url": "https://sunwave.io/jobs/007",
+    "description": "Design new product experiences for expansion into new verticals."
+  },
+  {
+    "id": "sunwave-008",
+    "title": "ML Platform Engineer",
+    "team": "Infrastructure",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "seniority": "Senior",
+    "posted_at": "2024-08-03T09:00:00Z",
+    "url": "https://sunwave.io/jobs/008",
+    "description": "Own ML infrastructure and internal platform tooling to support product scale."
+  }
+]
