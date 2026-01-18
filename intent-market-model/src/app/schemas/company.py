@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class CompanyCreate(BaseModel):
     name: str
     domain: str | None = None
+    greenhouse_board: str | None = None
 
 
 class CompanyRead(BaseModel):
@@ -14,6 +15,7 @@ class CompanyRead(BaseModel):
     tenant_id: int
     name: str
     domain: str | None
+    greenhouse_board: str | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

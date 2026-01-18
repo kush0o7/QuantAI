@@ -9,6 +9,10 @@ def stable_hash(payload: dict[str, Any]) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
+def hash_string(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
 def _default(value: Any) -> str:
     if isinstance(value, datetime):
         return value.isoformat()

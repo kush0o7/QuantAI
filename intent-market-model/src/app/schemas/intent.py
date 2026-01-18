@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class IntentHypothesisRead(BaseModel):
@@ -10,7 +10,12 @@ class IntentHypothesisRead(BaseModel):
     company_id: int
     intent_type: str
     confidence: float
+    readiness_score: float | None
+    alert_eligible: bool
+    alert_reason: str | None
     evidence: list[dict]
+    rule_hits_json: list[dict] = Field(default_factory=list)
+    explanations_json: list[dict] = Field(default_factory=list)
     explanation: str
     created_at: datetime
 
@@ -25,6 +30,7 @@ class IntentSummary(BaseModel):
 class IntentDashboardItem(BaseModel):
     intent_type: str
     confidence: float
+    readiness_score: float | None = None
     explanation: str
     evidence: list[dict]
 

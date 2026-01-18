@@ -46,14 +46,19 @@ def list_company_intents(session: Session, tenant_id: int, company_id: int) -> l
 
 
 def list_intents_since(
-    session: Session, tenant_id: int, company_id: int, since
+    session: Session,
+    tenant_id: int,
+    company_id: int,
+    since,
+    intent_type: str | None = None,
 ) -> list[IntentHypothesis]:
-    return list(
-        session.execute(
-            select(IntentHypothesis)
-            .where(IntentHypothesis.tenant_id == tenant_id)
-            .where(IntentHypothesis.company_id == company_id)
-            .where(IntentHypothesis.created_at >= since)
-            .order_by(IntentHypothesis.created_at)
-        ).scalars()
+    query = (
+        select(IntentHypothesis)
+        .where(IntentHypothesis.tenant_id == tenant_id)
+        .where(IntentHypothesis.company_id == company_id)
+        .where(IntentHypothesis.created_at >= since)
     )
+    if intent_type:
+        query = query.where(IntentHypothesis.intent_type == intent_type)
+    query = query.order_by(IntentHypothesis.created_at)
+    return list(session.execute(query).scalars())

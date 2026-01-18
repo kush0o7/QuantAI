@@ -6,6 +6,7 @@ COPY pyproject.toml README.md /app/
 COPY src /app/src
 COPY jobs /app/jobs
 COPY data /app/data
+COPY scripts /app/scripts
 
 RUN pip install --no-cache-dir -e .
 

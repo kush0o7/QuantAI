@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from agents.base import AgentBase
 from agents.intent_inference.fusion import fuse
 from data.storage.db import IntentHypothesis, SignalEvent
-from data.storage.repositories import intents_repo
+from data.storage.repositories import intents_repo, signals_repo
+
+_READINESS_THRESHOLD = 70.0
+_PERSISTENCE_DAYS = 60
+_SOURCE_WINDOW_DAYS = 30
 
 
 class IntentInferenceAgent(AgentBase):
@@ -29,6 +34,8 @@ class IntentInferenceAgent(AgentBase):
             return []
         for intent in intents:
             intent.tenant_id = tenant_id
+            if intent.intent_type == "IPO_PREP":
+                _apply_trust_layer(self.session, tenant_id, intent)
         intents = _dedupe_intents(intents, existing_pairs)
         if not intents:
             return []
@@ -68,3 +75,62 @@ def _dedupe_intents(
         seen.add(key)
         deduped.append(intent)
     return deduped
+
+
+def _apply_trust_layer(session: Session, tenant_id: int, intent: IntentHypothesis) -> None:
+    readiness = intent.readiness_score or 0.0
+    if readiness < _READINESS_THRESHOLD:
+        intent.alert_eligible = False
+        intent.alert_reason = f"Readiness below {_READINESS_THRESHOLD:.0f} threshold."
+        _append_trust_explanation(intent, 0, False, False)
+        return
+
+    reference_time = intent.created_at or datetime.now(timezone.utc)
+    since_persistence = reference_time - timedelta(days=_PERSISTENCE_DAYS)
+    since_sources = reference_time - timedelta(days=_SOURCE_WINDOW_DAYS)
+
+    recent_intents = intents_repo.list_intents_since(
+        session, tenant_id, intent.company_id, since_persistence, intent_type="IPO_PREP"
+    )
+    persisted = any(
+        prior.readiness_score is not None and prior.readiness_score >= _READINESS_THRESHOLD
+        for prior in recent_intents
+    )
+
+    recent_signals = signals_repo.list_signals_since(
+        session, tenant_id, intent.company_id, since_sources
+    )
+    source_count = len({signal.source for signal in recent_signals})
+    multi_source = source_count >= 2
+
+    if persisted or multi_source:
+        intent.alert_eligible = True
+        if persisted and multi_source:
+            intent.alert_reason = "Readiness persisted and confirmed across sources."
+        elif persisted:
+            intent.alert_reason = "Readiness persisted across periods."
+        else:
+            intent.alert_reason = "Readiness confirmed across multiple sources."
+    else:
+        intent.alert_eligible = False
+        intent.alert_reason = "Readiness high but not persistent or multi-source yet."
+
+    _append_trust_explanation(intent, source_count, persisted, multi_source)
+
+
+def _append_trust_explanation(
+    intent: IntentHypothesis, source_count: int, persisted: bool, multi_source: bool
+) -> None:
+    explanations = intent.explanations_json or []
+    explanations.append(
+        {
+            "alert_eligible": intent.alert_eligible,
+            "alert_reason": intent.alert_reason,
+            "persistence_window_days": _PERSISTENCE_DAYS,
+            "source_window_days": _SOURCE_WINDOW_DAYS,
+            "source_count": source_count,
+            "persisted": persisted,
+            "multi_source": multi_source,
+        }
+    )
+    intent.explanations_json = explanations

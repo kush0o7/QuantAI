@@ -1,0 +1,16 @@
+company_name,domain,s1_date,precision_at_k,median_lead_time_months,false_positives,status
+Airbnb,airbnb.com,2020-08-24,0.200,,0,ok
+Coinbase,coinbase.com,2021-02-25,0.200,,0,ok
+DoorDash,doordash.com,2020-08-24,0.200,,0,ok
+Snowflake,snowflake.com,2020-08-24,0.200,,0,ok
+Palantir,palantir.com,2020-08-21,0.200,,0,ok
+Roblox,roblox.com,2020-10-08,0.200,,0,ok
+Rivian,rivian.com,2021-10-01,0.200,,0,ok
+Datadog,datadoghq.com,2019-08-27,0.200,,0,ok
+ZoomInfo,zoominfo.com,2020-03-27,0.200,,0,ok
+Asana,asana.com,2020-08-18,0.200,,0,ok
+Unity,unity.com,2020-08-24,0.200,,0,ok
+Instacart,instacart.com,2023-08-25,0.200,,0,ok
+Arm,arm.com,2023-08-21,0.200,,0,ok
+Reddit,reddit.com,2024-02-22,0.200,,0,ok
+Stripe,stripe.com,,0.000,,0,ok

@@ -1,4 +1,5 @@
 from data.storage.repositories import (
+    api_keys_repo,
     company_repo,
     intents_repo,
     signals_repo,
@@ -9,6 +10,7 @@ from data.storage.repositories import (
 )
 
 __all__ = [
+    "api_keys_repo",
     "company_repo",
     "intents_repo",
     "signals_repo",

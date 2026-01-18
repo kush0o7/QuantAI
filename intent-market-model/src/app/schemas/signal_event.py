@@ -13,8 +13,15 @@ class SignalEventRead(BaseModel):
     signal_type: str
     raw_text: str
     raw_text_uri: str | None
+    snippet: str | None
     structured_fields: dict
     diff: dict
+    vectorizer_version: str | None
+    tokens: list[str]
+    drift_score: float | None
+    top_terms_delta: list[dict]
+    role_bucket_delta: dict
+    tech_tag_delta: dict
     created_at: datetime
 
     model_config = {"from_attributes": True}

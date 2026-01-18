@@ -6,8 +6,16 @@ from sqlalchemy.orm import Session
 from data.storage.db import Company
 
 
-def create_company(session: Session, tenant_id: int, name: str, domain: str | None) -> Company:
-    company = Company(tenant_id=tenant_id, name=name, domain=domain)
+def create_company(
+    session: Session,
+    tenant_id: int,
+    name: str,
+    domain: str | None,
+    greenhouse_board: str | None = None,
+) -> Company:
+    company = Company(
+        tenant_id=tenant_id, name=name, domain=domain, greenhouse_board=greenhouse_board
+    )
     session.add(company)
     session.commit()
     session.refresh(company)

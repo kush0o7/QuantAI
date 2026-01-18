@@ -20,3 +20,7 @@ def list_tenants(session: Session) -> list[Tenant]:
 
 def get_tenant(session: Session, tenant_id: int) -> Tenant | None:
     return session.get(Tenant, tenant_id)
+
+
+def get_tenant_by_name(session: Session, name: str) -> Tenant | None:
+    return session.execute(select(Tenant).where(Tenant.name == name)).scalars().first()

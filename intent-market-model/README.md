@@ -1,6 +1,43 @@
 # Intent-Level Market Model MVP
 
-This MVP detects early organizational intent by tracking semantic drift and hiring signal changes in job posts. It persists all signals, embeddings, and intent hypotheses in Postgres with pgvector, and exposes a FastAPI API to query intents and evidence.
+Intent-Level Market Model is an end-to-end system that ingests hiring signals and SEC filing text, measures semantic drift, and infers strategic intent (with a focused wedge on IPO preparation). It normalizes raw text into structured SignalEvents, computes drift and deltas, scores intent hypotheses, and serves them via a FastAPI API and demo UI. The core value is early, explainable detection of IPO readiness before public announcements.
+
+## What this project does
+
+- Ingests hiring posts and SEC filing text (mock fixtures + live Greenhouse supported)
+- Normalizes into SignalEvent records with role buckets, tech tags, and structured metadata
+- Computes drift metrics (TF-IDF similarity + keyword deltas + role/tech deltas)
+- Scores intent hypotheses (rule-based IPO_PREP + other intents)
+- Applies a trust layer for alerts: readiness ≥ 70 and persistent or multi-source
+- Stores data in Postgres + pgvector (embeddings optional)
+- Serves API endpoints for intents, timelines, explainability, and backtest KPIs
+- Includes a demo UI with watchlist, IPO readiness timeline, explainability, and backtest report
+
+## Wedge focus
+
+**Detect IPO preparation months before it becomes public** using hiring language drift and filings.
+
+## Architecture at a glance
+
+- Connectors: Greenhouse + mock sources ingest raw job posts and SEC text
+- Normalization: raw text → SignalEvent with role/tech tags
+- Drift engine: TF-IDF similarity + keyword/role/tech deltas
+- Intent scoring: rule-based IPO_PREP + supporting intents
+- Trust layer: readiness threshold + persistence/multi-source gating
+- Persistence: Postgres + optional pgvector embeddings
+- API + UI: FastAPI endpoints, demo UI (watchlist → timeline → explain → backtest)
+
+## Product positioning
+
+- Purpose: early, explainable IPO readiness detection
+- Buyer: investors, analysts, late-stage growth teams
+- KPI: lead time before S-1 at precision@20
+
+## Demo flow (3 steps)
+
+1) Create tenant + API key (or run `make demo`)
+2) Ingest job posts + filings
+3) Review Watchlist → IPO Timeline → Explainability → Backtest
 
 ## Run with Docker Compose
 
@@ -42,6 +79,37 @@ Ingest mock SEC filings:
 
 ```bash
 curl -X POST "http://localhost:8000/tenants/1/companies/ingest/1?source=sec_mock"
+```
+
+## Greenhouse job board (public API)
+
+Greenhouse provides a public job board API at:
+`https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=true`
+
+Set `GREENHOUSE_BOARD_MAP` to map company domains to board slugs:
+
+```bash
+export GREENHOUSE_BOARD_MAP='{"acme-ai.com":"acmeai","airbnb.com":"airbnb"}'
+```
+
+Then ingest:
+
+```bash
+curl -X POST "http://localhost:8000/tenants/1/companies/ingest/1?source=greenhouse"
+```
+
+## Demo script (one command)
+
+Generate a ready-to-show demo with tenant, API key, company, ingests, and backtest data:
+
+```bash
+make demo
+```
+
+Reset demo DB and rebuild:
+
+```bash
+make demo-reset
 ```
 
 Skip inference during ingest:
@@ -140,7 +208,7 @@ Large deviations indicate intent changes before outcomes surface.
 
 ## Known limitations
 
-- Only the mock fixture connector is fully implemented.
+- Only the mock fixture and Greenhouse connectors are implemented.
 - Rule-based inference is minimal and not tuned with outcomes.
 - Scheduler is a simple in-process loop (no retries or distributed coordination).
 

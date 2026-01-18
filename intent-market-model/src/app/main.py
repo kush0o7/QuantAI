@@ -15,6 +15,9 @@ from app.api.v1.routes_timeline import router as timeline_router
 from app.api.v1.routes_graph import router as graph_router
 from app.api.v1.routes_pipeline import router as pipeline_router
 from app.api.v1.routes_tenants import router as tenants_router
+from app.api.v1.routes_watchlist import router as watchlist_router
+from app.api.middleware.auth import ApiKeyAuthMiddleware
+from app.api.middleware.audit import AuditLogMiddleware
 from core.config import get_settings
 from core.logger import setup_logging
 from data.storage.db import init_db, SessionLocal
@@ -26,6 +29,9 @@ setup_logging()
 app = FastAPI(title="Intent-Level Market Model MVP")
 logger = logging.getLogger(__name__)
 STATIC_DIR = Path(__file__).parent / "frontend"
+_ALLOW_PATHS = {"/health", "/", "/openapi.json", "/docs", "/redoc", "/tenants"}
+app.add_middleware(ApiKeyAuthMiddleware, allow_paths=_ALLOW_PATHS)
+app.add_middleware(AuditLogMiddleware)
 
 
 @app.on_event("startup")
@@ -54,6 +60,7 @@ app.include_router(backtest_router, tags=["backtest"])
 app.include_router(timeline_router, tags=["timeline"])
 app.include_router(pipeline_router, tags=["pipeline"])
 app.include_router(graph_router, tags=["graph"])
+app.include_router(watchlist_router, tags=["watchlist"])
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

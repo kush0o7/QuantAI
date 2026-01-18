@@ -1,5 +1,7 @@
 const tenantIdInput = document.getElementById("tenant-id");
 const companyIdInput = document.getElementById("company-id");
+const apiKeyInput = document.getElementById("api-key");
+const apiKeyStatus = document.getElementById("api-key-status");
 const tenantStatus = document.getElementById("tenant-status");
 const companyStatus = document.getElementById("company-status");
 const ingestStatus = document.getElementById("ingest-status");
@@ -10,14 +12,42 @@ const backtestEl = document.getElementById("backtest-report");
 const backtestScorecard = document.getElementById("backtest-scorecard");
 const backtestChart = document.getElementById("backtest-chart");
 const timelineEl = document.getElementById("intent-timeline");
+const backtestPortfolioSummary = document.getElementById("backtest-portfolio-summary");
+const backtestPortfolioTable = document.getElementById("backtest-portfolio-table");
+const watchlistTable = document.getElementById("watchlist-table");
+const readinessTimeline = document.getElementById("readiness-timeline");
+const explainPanel = document.getElementById("explain-panel");
 
 const setStatus = (el, text, tone = "") => {
   el.textContent = text;
   el.style.color = tone;
 };
 
+const getApiKey = () => {
+  return apiKeyInput.value.trim() || localStorage.getItem("apiKey") || "";
+};
+
+const saveApiKey = (value, tenantId = null) => {
+  const trimmed = value.trim();
+  if (trimmed) {
+    localStorage.setItem("apiKey", trimmed);
+    if (tenantId) {
+      localStorage.setItem("apiKeyTenantId", String(tenantId));
+    }
+  } else {
+    localStorage.removeItem("apiKey");
+    localStorage.removeItem("apiKeyTenantId");
+  }
+  apiKeyInput.value = trimmed;
+};
+
 const api = async (path, options = {}) => {
-  const response = await fetch(path, options);
+  const headers = { ...(options.headers || {}) };
+  const apiKey = getApiKey();
+  if (apiKey) {
+    headers["X-API-Key"] = apiKey;
+  }
+  const response = await fetch(path, { ...options, headers });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || "Request failed");
@@ -55,10 +85,14 @@ const renderFeed = (items) => {
     if (!evidence) return;
     const feed = document.createElement("div");
     feed.className = "feed-item";
+    const triggers = evidence.triggers || [];
+    const triggerLine = triggers.length
+      ? `Triggers: ${triggers.join(", ")}`
+      : "No explicit rule hits; drift-based signal.";
     feed.innerHTML = `
       <span>${item.intent_type}</span>
       <p>${evidence.snippet}</p>
-      <p class="tiny">Triggers: ${(evidence.triggers || []).join(", ")}</p>
+      <p class="tiny">${triggerLine}</p>
     `;
     feedEl.appendChild(feed);
   });
@@ -69,6 +103,8 @@ const loadDashboard = async (tenantId, companyId) => {
   renderDashboard(data.items || []);
   renderFeed(data.items || []);
   await loadTimeline(tenantId, companyId);
+  await loadReadinessTimeline(tenantId, companyId);
+  await loadExplainability(tenantId, companyId);
 };
 
 const ensureTenantId = () => {
@@ -97,6 +133,15 @@ const runDemo = async () => {
   tenantIdInput.value = tenant.id;
   setStatus(tenantStatus, `Tenant ready (id ${tenant.id}).`);
 
+  setStatus(apiKeyStatus, "Creating API key...");
+  const apiKey = await api(`/tenants/${tenant.id}/api-keys`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "demo-key", rate_limit_per_min: 120 }),
+  });
+  saveApiKey(apiKey.key, tenant.id);
+  setStatus(apiKeyStatus, "API key saved for this browser.");
+
   setStatus(companyStatus, "Creating demo company...");
   const company = await api(`/tenants/${tenant.id}/companies/`, {
     method: "POST",
@@ -113,6 +158,8 @@ const runDemo = async () => {
 
   setStatus(ingestStatus, "Loading intent dashboard...");
   await loadDashboard(tenant.id, company.id);
+  await loadWatchlist(tenant.id);
+  await loadBacktestPortfolio(tenant.id);
   await seedOutcomes();
   await runBacktest();
   setStatus(ingestStatus, "Done.");
@@ -128,22 +175,51 @@ const createTenant = async () => {
   });
   tenantIdInput.value = tenant.id;
   setStatus(tenantStatus, `Created ${tenant.name} (id ${tenant.id}).`);
+  await generateApiKey();
 };
 
 const loadTenant = async () => {
   const tenantId = ensureTenantId();
+  const storedTenant = localStorage.getItem("apiKeyTenantId");
+  if (storedTenant && storedTenant !== tenantId) {
+    setStatus(
+      tenantStatus,
+      `API key belongs to tenant ${storedTenant}. Generate a new key for tenant ${tenantId}.`,
+      "#d84845"
+    );
+    return;
+  }
   setStatus(tenantStatus, `Using tenant ${tenantId}.`);
+  await loadWatchlist(tenantId);
+  await loadBacktestPortfolio(tenantId);
+};
+
+const generateApiKey = async () => {
+  const tenantId = ensureTenantId();
+  setStatus(apiKeyStatus, "Creating API key...");
+  const apiKey = await api(`/tenants/${tenantId}/api-keys`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "browser-key", rate_limit_per_min: 120 }),
+  });
+  saveApiKey(apiKey.key, tenantId);
+  setStatus(apiKeyStatus, "API key saved for this browser.");
 };
 
 const createCompany = async () => {
   const tenantId = ensureTenantId();
   const name = document.getElementById("company-name").value.trim();
   const domain = document.getElementById("company-domain").value.trim();
+  const greenhouseBoard = document.getElementById("company-greenhouse").value.trim();
   setStatus(companyStatus, "Creating company...");
   const company = await api(`/tenants/${tenantId}/companies/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, domain }),
+    body: JSON.stringify({
+      name,
+      domain,
+      greenhouse_board: greenhouseBoard || null,
+    }),
   });
   companyIdInput.value = company.id;
   setStatus(companyStatus, `Created ${company.name} (id ${company.id}).`);
@@ -154,6 +230,7 @@ const loadCompany = async () => {
   const companyId = ensureCompanyId();
   setStatus(companyStatus, `Loading company ${companyId}...`);
   await loadDashboard(tenantId, companyId);
+  await loadWatchlist(tenantId);
   setStatus(companyStatus, `Loaded company ${companyId}.`);
 };
 
@@ -163,6 +240,7 @@ const ingestSource = async (source) => {
   setStatus(ingestStatus, `Ingesting ${source}...`);
   await api(`/tenants/${tenantId}/companies/ingest/${companyId}?source=${source}`, { method: "POST" });
   await loadDashboard(tenantId, companyId);
+  await loadWatchlist(tenantId);
   setStatus(ingestStatus, `Ingested ${source}.`);
 };
 
@@ -173,6 +251,7 @@ const runPipeline = async () => {
   if (companyIdInput.value.trim()) {
     await loadDashboard(tenantId, companyIdInput.value.trim());
   }
+  await loadWatchlist(tenantId);
   setStatus(ingestStatus, "Pipeline complete.");
 };
 
@@ -180,10 +259,24 @@ const seedOutcomes = async () => {
   const tenantId = ensureTenantId();
   const companyId = ensureCompanyId();
   setStatus(backtestStatus, "Adding sample outcomes...");
+  let baseDate = new Date();
+  try {
+    const signals = await api(`/tenants/${tenantId}/companies/${companyId}/signals/recent`);
+    if (signals && signals.length) {
+      baseDate = new Date(signals[0].timestamp);
+    }
+  } catch (err) {
+    baseDate = new Date();
+  }
+  const baseIso = (days) => {
+    const date = new Date(baseDate);
+    date.setUTCDate(date.getUTCDate() + days);
+    return date.toISOString();
+  };
   const payloads = [
-    { outcome_type: "IPO", timestamp: daysAheadIso(90), source: "demo" },
-    { outcome_type: "LAYOFF", timestamp: daysAheadIso(60), source: "demo" },
-    { outcome_type: "FUNDING", timestamp: daysAheadIso(30), source: "demo" },
+    { outcome_type: "IPO", timestamp: baseIso(90), source: "demo" },
+    { outcome_type: "LAYOFF", timestamp: baseIso(60), source: "demo" },
+    { outcome_type: "FUNDING", timestamp: baseIso(30), source: "demo" },
   ];
   for (const payload of payloads) {
     await api(`/tenants/${tenantId}/companies/${companyId}/outcomes`, {
@@ -199,15 +292,17 @@ const runBacktest = async () => {
   const tenantId = ensureTenantId();
   const companyId = ensureCompanyId();
   setStatus(backtestStatus, "Running backtest...");
-  await api(`/tenants/${tenantId}/companies/${companyId}/backtest/run?lookback_days=365`, {
+  await api(`/tenants/${tenantId}/companies/${companyId}/backtest/run?lookback_days=1095`, {
     method: "POST",
   });
   const report = await api(`/tenants/${tenantId}/companies/${companyId}/backtest/report`);
-  renderBacktest(report.metrics || []);
+  const kpis = await api(`/tenants/${tenantId}/companies/${companyId}/backtest/kpis`);
+  renderBacktest(report.metrics || [], kpis.kpis);
+  await loadBacktestPortfolio(tenantId);
   setStatus(backtestStatus, "Backtest complete.");
 };
 
-const renderBacktest = (metrics) => {
+const renderBacktest = (metrics, kpis) => {
   backtestEl.innerHTML = "";
   backtestScorecard.innerHTML = "";
   backtestChart.innerHTML = "";
@@ -215,7 +310,7 @@ const renderBacktest = (metrics) => {
     backtestEl.innerHTML = "<p>No backtest yet. Add outcomes and run it.</p>";
     return;
   }
-  renderScorecard(metrics);
+  renderScorecard(metrics, kpis);
   renderChart(metrics);
   metrics.forEach((metric) => {
     const card = document.createElement("div");
@@ -231,7 +326,7 @@ const renderBacktest = (metrics) => {
   });
 };
 
-const renderScorecard = (metrics) => {
+const renderScorecard = (metrics, kpis) => {
   const totalOutcomes = metrics.reduce((sum, m) => sum + m.outcomes, 0);
   const totalMatched = metrics.reduce((sum, m) => sum + m.matched, 0);
   const matchRate = totalOutcomes ? Math.round((totalMatched / totalOutcomes) * 100) : 0;
@@ -243,6 +338,17 @@ const renderScorecard = (metrics) => {
     { title: "Match rate", value: `${matchRate}%` },
     { title: "Avg lead time", value: avgLag ? `${avgLag.toFixed(1)} days` : "n/a" },
   ];
+  if (kpis) {
+    cards.push({
+      title: `Precision@${kpis.k}`,
+      value: `${Math.round(kpis.precision_at_k * 100)}%`,
+    });
+    cards.push({
+      title: "Median lead time",
+      value: kpis.median_lead_time_months ? `${kpis.median_lead_time_months} months` : "n/a",
+    });
+    cards.push({ title: "False positives", value: kpis.false_positives });
+  }
 
   cards.forEach((card) => {
     const node = document.createElement("div");
@@ -291,7 +397,9 @@ const daysAheadIso = (days) => {
 };
 
 const loadTimeline = async (tenantId, companyId) => {
-  const data = await api(`/tenants/${tenantId}/companies/${companyId}/intents/timeline`);
+  const data = await api(
+    `/tenants/${tenantId}/companies/${companyId}/intents/timeline?days=1095`
+  );
   timelineEl.innerHTML = "";
   if (!data.series || !data.series.length) {
     timelineEl.innerHTML = "<p>No timeline yet. Ingest signals first.</p>";
@@ -309,7 +417,172 @@ const loadTimeline = async (tenantId, companyId) => {
   });
 };
 
+const loadBacktestPortfolio = async (tenantId) => {
+  backtestPortfolioSummary.innerHTML = "";
+  backtestPortfolioTable.innerHTML = "";
+  let data;
+  try {
+    data = await api(`/tenants/${tenantId}/backtest/ipo_report`);
+  } catch (err) {
+    backtestPortfolioTable.innerHTML =
+      "<p>No portfolio report yet. Run scripts/run_backtest_report.py.</p>";
+    return;
+  }
+  const summary = document.createElement("div");
+  summary.className = "card";
+  summary.innerHTML = `
+    <h4>Summary</h4>
+    <p>Companies: ${data.summary.companies}</p>
+    <p>Precision@20: ${
+      data.summary.precision_at_k_avg !== null
+        ? Math.round(data.summary.precision_at_k_avg * 100) + "%"
+        : "n/a"
+    }</p>
+    <p>Median lead time: ${
+      data.summary.median_lead_time_months !== null
+        ? data.summary.median_lead_time_months + " months"
+        : "n/a"
+    }</p>
+  `;
+  backtestPortfolioSummary.appendChild(summary);
+
+  const header = document.createElement("div");
+  header.className = "table-row header";
+  header.innerHTML = `
+    <div>Company</div>
+    <div>S-1</div>
+    <div>Precision@20</div>
+    <div>Lead time</div>
+    <div>Status</div>
+  `;
+  backtestPortfolioTable.appendChild(header);
+  data.rows.forEach((row) => {
+    const node = document.createElement("div");
+    node.className = "table-row";
+    node.innerHTML = `
+      <div>${row.company_name}</div>
+      <div>${row.s1_date || "—"}</div>
+      <div>${row.precision_at_k !== null ? Math.round(row.precision_at_k * 100) + "%" : "—"}</div>
+      <div>${row.median_lead_time_months !== null ? row.median_lead_time_months + " mo" : "—"}</div>
+      <div>${row.status}</div>
+    `;
+    backtestPortfolioTable.appendChild(node);
+  });
+};
+
+const loadWatchlist = async (tenantId) => {
+  const data = await api(`/tenants/${tenantId}/watchlist`);
+  watchlistTable.innerHTML = "";
+  if (!data.items || !data.items.length) {
+    watchlistTable.innerHTML = "<p>No companies yet. Add a company to get started.</p>";
+    return;
+  }
+  const unique = new Map();
+  data.items.forEach((item) => {
+    unique.set(item.company_id, item);
+  });
+  const header = document.createElement("div");
+  header.className = "table-row header";
+  header.innerHTML = `
+    <div>Company</div>
+    <div>Readiness</div>
+    <div>Delta</div>
+    <div>Confidence</div>
+    <div>Alert</div>
+    <div>Top rules</div>
+  `;
+  watchlistTable.appendChild(header);
+  Array.from(unique.values()).forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "table-row";
+    const readiness = item.readiness_score ? item.readiness_score.toFixed(1) : "—";
+    const delta = item.score_delta ? item.score_delta.toFixed(1) : "—";
+    const confidence = item.confidence ? `${(item.confidence * 100).toFixed(0)}%` : "—";
+    const alert = item.alert_eligible ? "Eligible" : "Hold";
+    row.innerHTML = `
+      <div>${item.company_name} <span class="tiny">#${item.company_id}</span></div>
+      <div>${readiness}</div>
+      <div>${delta}</div>
+      <div>${confidence}</div>
+      <div>${alert}</div>
+      <div>${(item.top_rule_hits || []).join(", ") || "—"}</div>
+    `;
+    watchlistTable.appendChild(row);
+  });
+};
+
+const loadReadinessTimeline = async (tenantId, companyId) => {
+  const data = await api(
+    `/tenants/${tenantId}/companies/${companyId}/timeline/ipo_prep?days=1095`
+  );
+  readinessTimeline.innerHTML = "";
+  if (!data.points || !data.points.length) {
+    readinessTimeline.innerHTML = "<p>No IPO readiness history yet.</p>";
+    return;
+  }
+  data.points.slice(-8).forEach((point) => {
+    const row = document.createElement("div");
+    row.className = "timeline-row";
+    const score = point.readiness_score ? point.readiness_score.toFixed(1) : "—";
+    const drift = point.drift_score ? point.drift_score.toFixed(2) : "—";
+    row.innerHTML = `
+      <div>${new Date(point.timestamp).toLocaleDateString()}</div>
+      <div class="score">${score}</div>
+      <div>Drift ${drift}</div>
+      <div>${point.rule_hits} rules</div>
+    `;
+    readinessTimeline.appendChild(row);
+  });
+};
+
+const loadExplainability = async (tenantId, companyId) => {
+  let data;
+  try {
+    data = await api(`/tenants/${tenantId}/companies/${companyId}/explain`);
+  } catch (err) {
+    explainPanel.innerHTML = "<p>No IPO_PREP intent found yet. Ingest signals first.</p>";
+    return;
+  }
+  explainPanel.innerHTML = "";
+  const header = document.createElement("div");
+  header.className = "feed-item";
+  const alertStatus = data.alert_eligible ? "Alert eligible" : "Not alert eligible";
+  header.innerHTML = `
+    <span>IPO readiness ${data.readiness_score ? data.readiness_score.toFixed(1) : "—"}</span>
+    <p>Confidence ${(data.confidence * 100).toFixed(0)}% · ${alertStatus}</p>
+    <p class="tiny">${data.alert_reason || ""}</p>
+  `;
+  explainPanel.appendChild(header);
+  (data.rule_hits || []).forEach((hit) => {
+    const card = document.createElement("div");
+    card.className = "feed-item";
+    card.innerHTML = `
+      <span>${hit.rule_name}</span>
+      <p>${hit.snippet}</p>
+      <p class="tiny">${hit.source_snippet}</p>
+    `;
+    explainPanel.appendChild(card);
+  });
+  if (data.source_snippets && data.source_snippets.length) {
+    const block = document.createElement("div");
+    block.className = "feed-item";
+    block.innerHTML = `
+      <span>Source evidence</span>
+      <p>${data.source_snippets.map((s) => s.snippet).join("<br/>")}</p>
+    `;
+    explainPanel.appendChild(block);
+  }
+};
+
 const bind = () => {
+  apiKeyInput.value = localStorage.getItem("apiKey") || "";
+  document.getElementById("set-api-key").addEventListener("click", () => {
+    saveApiKey(apiKeyInput.value);
+    setStatus(apiKeyStatus, apiKeyInput.value ? "API key saved." : "API key cleared.");
+  });
+  document.getElementById("generate-api-key").addEventListener("click", () => {
+    generateApiKey().catch((err) => setStatus(apiKeyStatus, err.message, "#d84845"));
+  });
   document.getElementById("run-demo").addEventListener("click", () => {
     runDemo().catch((err) => setStatus(ingestStatus, err.message, "#d84845"));
   });
