@@ -98,6 +98,17 @@ Then ingest:
 curl -X POST "http://localhost:8000/tenants/1/companies/ingest/1?source=greenhouse"
 ```
 
+## Real-time ingestion (daily)
+
+1) Set `greenhouse_board` when creating a company (or use `GREENHOUSE_BOARD_MAP`)
+2) Enable the scheduler:
+
+```bash
+ENABLE_SCHEDULER=true
+SCHEDULER_INTERVAL_HOURS=24
+SCHEDULER_SOURCE=greenhouse
+```
+
 ## Demo script (one command)
 
 Generate a ready-to-show demo with tenant, API key, company, ingests, and backtest data:
@@ -221,3 +232,11 @@ Large deviations indicate intent changes before outcomes surface.
 ## Scheduler (optional)
 
 Set `ENABLE_SCHEDULER=true` in `.env` to run the pipeline on a fixed interval (default 24 hours).
+
+You can ingest multiple sources by comma-separating them:
+
+```bash
+ENABLE_SCHEDULER=true
+SCHEDULER_INTERVAL_HOURS=24
+SCHEDULER_SOURCE=greenhouse,sec_mock
+```
